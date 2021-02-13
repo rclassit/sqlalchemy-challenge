@@ -53,7 +53,18 @@ def precipiation():
 
     return jsonify(prcp_dates)
 
+@app.route("/api/v1.0/stations")
+def stations():
+    session=Session(engine)
 
+    stations = {}
+
+    results = session.query(station.station, station.name).all()
+    for s, name in results:
+        stations[s] = name
+    
+    session.close()
+    return jsonify(stations)
 
 
 if __name__ == '__main__':
