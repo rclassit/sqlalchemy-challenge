@@ -66,6 +66,53 @@ def stations():
     session.close()
     return jsonify(stations)
 
+@app.route("/api/v1.0/tobs")
+def tobs():
+    session=Session(engine)
+
+    #Date data 
+    last_date = session.query(measurement.date).order_by(measurement.date.desc()).first()
+    one_year_ago = (dt.datetime.strptime(last_date[0],'%Y-%m-%d') \
+                - dt.timedelta(days=365)).strftime('%Y-%m-%d')
+    
+    #Dates and Temps
+    results = session.query(measurement.date,measurement.tobs).\
+            filter(measurement.date >= one_year_ago).\
+            order_by(measurement.date).all()
+    
+    #Jsonify/Dictionairy clean up 
+    results_tobs = []
+
+    for date,tobs in results: 
+        new_dict = {}
+        new_dict[date] = tobs
+        results_tobs.append(new_dict)
+    
+    session.close()
+
+    return jsonify(results_tobs)
+
+@app.route("/api/v1.0/<start>")
+def temp_range_start(start): 
+    
+    session = Session(engine)
+    
+    temp_list = []
+    #define any start date in '%Y-%m-%d'
+    results = session.query(measurement.date,func.min(measurement.tobs),func.avg(measurement.tobs),func.max(measurement.tobs)).\
+    filter(measurement.date >= '2010-01-01').group_by(measurement.date).all()
+    
+    for date, min, avg, max in results:
+        new_dict = {}
+        new_dict["Date"] = date
+        new_dict["TMIN"] = min
+        new_dict["TAVG"] = avg
+        new_dict["TMAX"] = max
+        temp_list.append(new_dict)
+
+    session.close() 
+    return jsonify(temp_list)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
