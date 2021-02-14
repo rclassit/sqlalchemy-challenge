@@ -113,6 +113,28 @@ def temp_range_start(start):
     session.close() 
     return jsonify(temp_list)
 
+@app.route("/api/v1.0/<start>/<end>")
+def temp_range_start_end(start,end):
+
+    session = Session(engine)
+
+    temp_list = []
+ #Pick a start and end date for the data to query and pull
+    results = session.query( measurement.date,func.min(measurement.tobs),func.avg(measurement.tobs),\
+                            func.max(measurement.tobs)).\
+                        filter(and_(measurement.date >= '2010-01-01', measurement.date <= '2010-12-31')).\
+                            group_by(measurement.date).all()
+    
+    for date,min,avg,max in results:
+        new_dict = {}
+        new_dict["Date"] = date
+        new_dict["TMIN"] = min
+        new_dict["TAVG"] = avg
+        new_dict["TMAX"] = max
+        temp_list.append(new_dict)
+    
+    session.close()
+    return jsonify(temp_list)
 
 if __name__ == '__main__':
     app.run(debug=True)
