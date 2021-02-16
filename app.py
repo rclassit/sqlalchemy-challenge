@@ -100,7 +100,7 @@ def temp_range_start(start):
     temp_list = []
     #define any start date in '%Y-%m-%d'
     results = session.query(measurement.date,func.min(measurement.tobs),func.avg(measurement.tobs),func.max(measurement.tobs)).\
-    filter(measurement.date >= '2010-01-01').group_by(measurement.date).all()
+    filter(measurement.date >= start).group_by(measurement.date).all()
     
     for date, min, avg, max in results:
         new_dict = {}
