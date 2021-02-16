@@ -95,10 +95,11 @@ def tobs():
 @app.route("/api/v1.0/<start>")
 def temp_range_start(start): 
     
+    #define any start date in '%Y-%m-%d' when querying API URL
     session = Session(engine)
     
     temp_list = []
-    #define any start date in '%Y-%m-%d'
+    
     results = session.query(measurement.date,func.min(measurement.tobs),func.avg(measurement.tobs),func.max(measurement.tobs)).\
     filter(measurement.date >= start).group_by(measurement.date).all()
     
@@ -122,7 +123,7 @@ def temp_range_start_end(start,end):
  #Pick a start and end date for the data to query and pull
     results = session.query( measurement.date,func.min(measurement.tobs),func.avg(measurement.tobs),\
                             func.max(measurement.tobs)).\
-                        filter(and_(measurement.date >= '2010-01-01', measurement.date <= '2010-12-31')).\
+                        filter(and_(measurement.date >= start, measurement.date <= end)).\
                             group_by(measurement.date).all()
     
     for date,min,avg,max in results:
